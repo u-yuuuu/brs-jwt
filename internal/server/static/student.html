@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRS - Мои оценки</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f2f2;
+        }
+
+        /* ===== HEADER ===== */
+
+        .header {
+            background: #2ecc71;
+            color: #ffffff;
+            padding: 15px;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .logo {
+            float: left;
+        }
+
+        .logo h1 {
+            font-size: 20px;
+        }
+
+        .user-info {
+            float: right;
+            text-align: right;
+        }
+
+        .username {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .user-type {
+            font-size: 12px;
+        }
+
+        .nav-buttons {
+            margin-top: 5px;
+        }
+
+        .nav-btn {
+            display: inline-block;
+            padding: 6px 12px;
+            margin-left: 5px;
+            background: #ffffff;
+            color: #333333;
+            border: 1px solid #cccccc;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* ===== MAIN ===== */
+
+        .main-content {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 10px;
+        }
+
+        .welcome-card {
+            background: #ffffff;
+            padding: 20px;
+            border: 1px solid #dddddd;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .welcome-title {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .welcome-subtitle {
+            font-size: 14px;
+            color: #555555;
+        }
+
+        /* ===== STATS ===== */
+
+        .stats-grid {
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            display: inline-block;
+            width: 23%;
+            min-width: 150px;
+            margin: 5px;
+            padding: 15px;
+            background: #3498db;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .stat-card.good { background: #27ae60; }
+        .stat-card.warning { background: #f39c12; }
+        .stat-card.danger { background: #e74c3c; }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 12px;
+        }
+
+        .courses-section {
+            background: #ffffff;
+            padding: 20px;
+            border: 1px solid #dddddd;
+        }
+
+        .section-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .course-card {
+            border: 1px solid #cccccc;
+            margin-bottom: 20px;
+        }
+
+        .course-header {
+            background: #34495e;
+            color: #ffffff;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .course-name {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .course-group {
+            font-size: 12px;
+        }
+
+        .course-average {
+            float: right;
+            background: #2c3e50;
+            padding: 5px 10px;
+            font-size: 13px;
+        }
+
+        .grades-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .grades-table th,
+        .grades-table td {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            font-size: 13px;
+        }
+
+        .grades-table th {
+            background: #eeeeee;
+        }
+
+        .grade-badge {
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #ffffff;
+            display: inline-block;
+        }
+
+        .grade-A { background: #27ae60; }
+        .grade-B { background: #2ecc71; }
+        .grade-C { background: #f39c12; }
+        .grade-D { background: #e67e22; }
+        .grade-F { background: #e74c3c; }
+
+        .progress-bar {
+            width: 80px;
+            height: 8px;
+            background: #cccccc;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .progress-fill {
+            height: 8px;
+            background: #3498db;
+        }
+
+        .progress-fill.good { background: #27ae60; }
+        .progress-fill.warning { background: #f39c12; }
+        .progress-fill.danger { background: #e74c3c; }
+
+        .no-grades,
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #555555;
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: #ffffff;
+            padding: 10px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>📚 BRS - Мои оценки</h1>
+            </div>
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="username">{{.Username}}</div>
+                    <div class="user-type">{{.UserType}}</div>
+                </div>
+                <div class="nav-buttons">
+                    <a href="/dashboard" class="nav-btn">Главная</a>
+                    <button class="nav-btn" onclick="logout()">Выйти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="welcome-card">
+            <h1 class="welcome-title">Мой академический прогресс</h1>
+            <p class="welcome-subtitle">Здесь вы можете отслеживать свои оценки по всем предметам</p>
+            
+            <div id="statsContainer" class="stats-grid">
+                <!-- Статистика будет загружена здесь -->
+            </div>
+        </div>
+
+        <div class="courses-section">
+            <h2 class="section-title">📊 Оценки по предметам</h2>
+            <div id="gradesContainer">
+                <div class="loading">Загрузка оценок...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let allGrades = [];
+
+    // Загрузка оценок студента
+    async function loadGrades() {
+        try {
+            showLoading();
+            const response = await fetch('/api/student/grades', {
+                credentials: 'include'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Received grades data:', data); // Для отладки
+            
+            if (!Array.isArray(data)) {
+                throw new Error('Invalid data format received from server');
+            }
+            
+            allGrades = data;
+            displayStats(allGrades);
+            displayGrades(allGrades);
+        } catch (error) {
+            console.error('Error loading grades:', error);
+            showError('Ошибка загрузки оценок: ' + error.message);
+        }
+    }
+
+    // Показать загрузку
+    function showLoading() {
+        document.getElementById('gradesContainer').innerHTML = 
+            '<div class="loading">Загрузка оценок...</div>';
+        document.getElementById('statsContainer').innerHTML = 
+            '<div class="stat-card"><div class="stat-value">...</div><div class="stat-label">Загрузка</div></div>';
+    }
+
+    // Показать ошибку
+    function showError(message) {
+        document.getElementById('gradesContainer').innerHTML = 
+            `<div class="error-message">${message}</div>`;
+    }
+
+    // Отображение статистики
+    function displayStats(grades) {
+        const statsContainer = document.getElementById('statsContainer');
+        
+        if (!grades || grades.length === 0) {
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Предметов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Всего заданий</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Выполнено</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0%</div>
+                    <div class="stat-label">Средний балл</div>
+                </div>
+            `;
+            return;
+        }
+
+        // Рассчитываем статистику
+        const totalCourses = grades.length;
+        const totalAssignments = grades.reduce((sum, course) => {
+            const courseGrades = course.grades || [];
+            return sum + courseGrades.length;
+        }, 0);
+        
+        const completedAssignments = grades.reduce((sum, course) => {
+            const courseGrades = course.grades || [];
+            return sum + courseGrades.filter(grade => grade && grade.points > 0).length;
+        }, 0);
+        
+        const averageGrade = grades.length > 0 ? 
+            grades.reduce((sum, course) => {
+                const courseAvg = course.average || 0;
+                return sum + (isNaN(courseAvg) ? 0 : courseAvg);
+            }, 0) / grades.length : 0;
+
+        // Определяем цвет карточки на основе средней оценки
+        let averageCardClass = 'good';
+        if (averageGrade < 70) averageCardClass = 'warning';
+        if (averageGrade < 60) averageCardClass = 'danger';
+
+        statsContainer.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-value">${totalCourses}</div>
+                <div class="stat-label">Предметов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${totalAssignments}</div>
+                <div class="stat-label">Всего заданий</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${completedAssignments}</div>
+                <div class="stat-label">Выполнено</div>
+            </div>
+            <div class="stat-card ${averageCardClass}">
+                <div class="stat-value">${isNaN(averageGrade) ? '0' : averageGrade.toFixed(1)}%</div>
+                <div class="stat-label">Средний балл</div>
+            </div>
+        `;
+    }
+
+    // Отображение оценок по курсам
+    function displayGrades(grades) {
+        const container = document.getElementById('gradesContainer');
+        
+        if (!grades || grades.length === 0) {
+            container.innerHTML = `
+                <div class="no-grades">
+                    <h3>Нет доступных оценок</h3>
+                    <p>Оценки появятся здесь после того, как преподаватель их выставит</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = grades.map(course => {
+            // Проверяем что все необходимые поля существуют
+            const courseName = course.course_name || course.subject_name || 'Неизвестный курс';
+            const subjectName = course.subject_name || 'Неизвестный предмет';
+            const groupName = course.group_name || 'Неизвестная группа';
+            const gradesList = course.grades || [];
+            const totalPoints = course.total_points || course.totalPoints || 0;
+            const totalMax = course.total_max || course.totalMax || 0;
+            const average = course.average || 0;
+            
+            const averageColorClass = getColorClass(average);
+            
+            return `
+                <div class="course-card">
+                    <div class="course-header">
+                        <div>
+                            <div class="course-name">${subjectName}</div>
+                            <div class="course-group">Группа: ${groupName}</div>
+                        </div>
+                        <div class="course-average ${averageColorClass}">
+                            Средний: ${isNaN(average) ? '0' : average.toFixed(1)}%
+                        </div>
+                    </div>
+                    
+                    ${gradesList.length > 0 ? `
+                        <table class="grades-table">
+                            <thead>
+                                <tr>
+                                    <th>Задание/Атрибут</th>
+                                    <th>Баллы</th>
+                                    <th>Процент</th>
+                                    <th>Оценка</th>
+                                    <th>Прогресс</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${gradesList.map(grade => {
+                                    if (!grade) return '';
+                                    
+                                    const attributeName = grade.attribute_name || 'Неизвестно';
+                                    const points = grade.points || 0;
+                                    const maxPoints = grade.max_points || grade.maxPoints || 0;
+                                    const percentage = grade.percentage || 0;
+                                    const gradeText = grade.grade || calculateGrade(percentage);
+                                    
+                                    const progressWidth = maxPoints > 0 ? 
+                                        (points / maxPoints) * 100 : 0;
+                                    const progressClass = getColorClass(progressWidth);
+                                    
+                                    return `
+                                        <tr>
+                                            <td>${attributeName}</td>
+                                            <td><strong>${isNaN(points) ? '0' : points.toFixed(1)}</strong> / ${isNaN(maxPoints) ? '0' : maxPoints.toFixed(1)}</td>
+                                            <td>${isNaN(percentage) ? '0' : percentage.toFixed(1)}%</td>
+                                            <td>
+                                                <span class="grade-badge grade-${gradeText.charAt(0)}">
+                                                    ${gradeText}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="progress-bar">
+                                                    <div class="progress-fill ${progressClass}" 
+                                                         style="width: ${isNaN(progressWidth) ? '0' : Math.max(0, Math.min(100, progressWidth))}%"></div>
+                                                </div>
+                                                ${isNaN(progressWidth) ? '0' : progressWidth.toFixed(0)}%
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                                <tr style="background: #f8f9fa; font-weight: 600;">
+                                    <td><strong>Итого по курсу</strong></td>
+                                    <td><strong>${isNaN(totalPoints) ? '0' : totalPoints.toFixed(1)}</strong> / ${isNaN(totalMax) ? '0' : totalMax.toFixed(1)}</td>
+                                    <td>${isNaN(average) ? '0' : average.toFixed(1)}%</td>
+                                    <td>
+                                        <span class="grade-badge grade-${calculateGrade(average).charAt(0)}">
+                                            ${calculateGrade(average)}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill ${averageColorClass}" 
+                                                 style="width: ${isNaN(average) ? '0' : Math.max(0, Math.min(100, average))}%"></div>
+                                        </div>
+                                        ${isNaN(average) ? '0' : average.toFixed(0)}%
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    ` : `
+                        <div class="no-grades">
+                            <p>Пока нет оценок по этому предмету</p>
+                        </div>
+                    `}
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Вспомогательные функции
+    function getColorClass(percentage) {
+        if (percentage >= 80) return 'good';
+        if (percentage >= 60) return 'warning';
+        return 'danger';
+    }
+
+    function calculateGrade(percentage) {
+        if (percentage >= 90) return "A (Отлично)";
+        if (percentage >= 80) return "B (Хорошо)";
+        if (percentage >= 70) return "C (Удовлетворительно)";
+        if (percentage >= 60) return "D (Достаточно)";
+        return "F (Неудовлетворительно)";
+    }
+
+    async function logout() {
+        try {
+            const response = await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                window.location.href = '/';
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            window.location.href = '/';
+        }
+    }
+
+    async function checkAuth() {
+        try {
+            const response = await fetch('/api/auth/verify', {
+                credentials: 'include'
+            });
+            
+            if (!response.ok) {
+                window.location.href = '/';
+                return;
+            }
+            
+            const data = await response.json();
+            if (data.user_type !== 'Student') {
+                window.location.href = '/dashboard';
+                return;
+            }
+            
+            // Загружаем оценки после проверки авторизации
+            loadGrades();
+        } catch (error) {
+            window.location.href = '/';
+        }
+    }
+
+    // Инициализация
+    checkAuth();
+</script>
+</body>
+</html>

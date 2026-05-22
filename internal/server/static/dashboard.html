@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRS - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f2f2;
+        }
+
+        /* ===== HEADER ===== */
+
+        .header {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .logo {
+            float: left;
+        }
+
+        .logo h1 {
+            font-size: 22px;
+        }
+
+        .user-info {
+            float: right;
+            text-align: right;
+        }
+
+        .username {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .user-type {
+            font-size: 12px;
+        }
+
+        .logout-btn {
+            margin-top: 5px;
+            padding: 6px 12px;
+            background: #ffffff;
+            color: #333;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        /* ===== MAIN ===== */
+
+        .main-content {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 10px;
+        }
+
+        .welcome-card {
+            background: #ffffff;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+
+        /* ===== FEATURE CARDS ===== */
+
+        .feature-card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .feature-icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .feature-title {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .feature-description {
+            font-size: 13px;
+            color: #555;
+        }
+
+        /* ===== COURSES ===== */
+
+        .courses-section {
+            margin-top: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .course-card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .course-name {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .course-subject,
+        .course-group {
+            font-size: 13px;
+            color: #555;
+        }
+
+        .no-courses {
+            padding: 20px;
+            background: #eeeeee;
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* ===== UTILS ===== */
+
+        .clearfix {
+            clear: both;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>📚 BRS System</h1>
+            </div>
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="username">{{.Username}}</div>
+                    <div class="user-type">{{.UserType}}</div>
+                </div>
+                <button class="logout-btn" onclick="logout()">Выйти</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="welcome-card">
+            <div class="feature-card" onclick="location.href='/change-password'" style="cursor: pointer;">
+                <div class="feature-icon">🔐</div>
+                <h3 class="feature-title">Смена пароля</h3>
+                <p class="feature-description">Обновите пароль вашего аккаунта для безопасности</p>
+            </div>
+            {{if eq .UserType "Professor"}}
+            <div class="feature-card" onclick="location.href='/professor'" style="cursor: pointer;">
+                <div class="feature-icon">👨‍🏫</div>
+                <h3 class="feature-title">Панель преподавателя</h3>
+                <p class="feature-description">Управление баллами студентов и курсами</p>
+            </div>
+            {{end}}
+            {{if eq .UserType "Student"}}
+            <div class="feature-card" onclick="location.href='/student'" style="cursor: pointer;">
+                <div class="feature-icon">📊</div>
+                <h3 class="feature-title">Мои оценки</h3>
+                <p class="feature-description">Просмотр текущих оценок и академического прогресса</p>
+            </div>
+            {{end}}
+    </div>
+
+    <script>
+        async function logout() {
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = '/';
+            }
+        }
+
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/verify', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                window.location.href = '/';
+            }
+        }
+
+        checkAuth();
+    </script>
+</body>
+</html>

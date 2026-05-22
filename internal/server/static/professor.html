@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRS - Панель преподавателя</title>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f2f2f2;
+    }
+
+    .header {
+        background: #3498db;
+        color: #ffffff;
+        padding: 15px;
+    }
+
+    .header-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        overflow: hidden;
+    }
+
+    .logo {
+        float: left;
+    }
+
+    .logo h1 {
+        font-size: 20px;
+    }
+
+    .user-info {
+        float: right;
+        text-align: right;
+    }
+
+    .username {
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .user-type {
+        font-size: 12px;
+    }
+
+    .nav-buttons {
+        margin-top: 5px;
+    }
+
+    .nav-btn {
+        display: inline-block;
+        padding: 6px 12px;
+        margin-left: 5px;
+        background: #ffffff;
+        color: #333333;
+        border: 1px solid #cccccc;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .main-content {
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 10px;
+    }
+
+    .control-panel {
+        background: #ffffff;
+        padding: 20px;
+        border: 1px solid #dddddd;
+        margin-bottom: 20px;
+    }
+
+    .panel-title {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+
+    .courses-grid {
+        margin-top: 10px;
+    }
+
+    .course-card {
+        border: 1px solid #cccccc;
+        padding: 15px;
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+
+    .course-card.active {
+        background: #e6f4ea;
+        border-left: 4px solid #27ae60;
+    }
+
+    .course-name {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .course-subject {
+        font-size: 13px;
+        color: #555555;
+    }
+
+    .course-group {
+        font-size: 12px;
+        font-style: italic;
+        color: #777777;
+    }
+
+    .attributes-section {
+        margin-top: 20px;
+    }
+
+    .attributes-grid {
+        overflow: hidden;
+    }
+
+    .attribute-card {
+        border: 1px solid #cccccc;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .attribute-name {
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .attribute-max {
+        font-size: 12px;
+        color: #555555;
+    }
+
+    .students-section {
+        background: #ffffff;
+        padding: 20px;
+        border: 1px solid #dddddd;
+    }
+
+    .section-title {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    .students-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .students-table th,
+    .students-table td {
+        border: 1px solid #cccccc;
+        padding: 8px;
+        font-size: 13px;
+    }
+
+    .students-table th {
+        background: #34495e;
+        color: #ffffff;
+    }
+
+    .points-input {
+        width: 70px;
+        padding: 5px;
+        border: 1px solid #cccccc;
+        text-align: center;
+    }
+
+    .save-btn {
+        padding: 6px 10px;
+        background: #27ae60;
+        color: #ffffff;
+        border: 1px solid #1e8449;
+        cursor: pointer;
+    }
+
+    .save-btn:disabled {
+        background: #aaaaaa;
+        border-color: #888888;
+        cursor: default;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 20px;
+        font-style: italic;
+        color: #555555;
+    }
+
+    .error-message {
+        background: #e74c3c;
+        color: #ffffff;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .success-message {
+        background: #27ae60;
+        color: #ffffff;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>📚 BRS - Панель преподавателя</h1>
+            </div>
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="username">{{.Username}}</div>
+                    <div class="user-type">{{.UserType}}</div>
+                </div>
+                <div class="nav-buttons">
+                    <a href="/dashboard" class="nav-btn">Главная</a>
+                    <button class="nav-btn" onclick="logout()">Выйти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="control-panel">
+            <h2 class="panel-title">Управление баллами студентов</h2>
+            
+            <div class="attributes-section">
+                <h3 class="section-title">Выберите курс:</h3>
+                <div id="coursesContainer" class="courses-grid">
+                    <div class="loading">Загрузка курсов...</div>
+                </div>
+            </div>
+
+            <div id="attributesSection" class="attributes-section" style="display: none;">
+                <h3 class="section-title">Атрибуты оценивания:</h3>
+                <div id="attributesContainer" class="attributes-grid">
+                    <!-- Атрибуты будут загружены здесь -->
+                </div>
+            </div>
+        </div>
+
+        <div id="studentsSection" class="students-section" style="display: none;">
+            <h3 class="section-title">Студенты курса</h3>
+            <div id="studentsContainer">
+                <!-- Таблица студентов будет загружена здесь -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCourseId = null;
+        let currentAttributes = [];
+
+        // Загрузка курсов преподавателя
+        async function loadCourses() {
+            try {
+                const response = await fetch('/api/professor/courses', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load courses');
+                }
+                
+                const courses = await response.json();
+                displayCourses(courses);
+            } catch (error) {
+                document.getElementById('coursesContainer').innerHTML = 
+                    '<div class="error-message">Ошибка загрузки курсов: ' + error.message + '</div>';
+            }
+        }
+
+        function displayCourses(courses) {
+            const container = document.getElementById('coursesContainer');
+            
+            if (courses.length === 0) {
+                container.innerHTML = '<div class="loading">Нет доступных курсов</div>';
+                return;
+            }
+            
+            container.innerHTML = courses.map(course => `
+                <div class="course-card" onclick="selectCourse(${course.course_id}, this)">
+                    <div class="course-name">${course.subject_name}</div>
+                    <div class="course-subject">${course.course_name}</div>
+                    <div class="course-group">Группа: ${course.group_name}</div>
+                </div>
+            `).join('');
+        }
+
+        // Выбор курса
+        async function selectCourse(courseId, element) {
+            // Сбрасываем выделение
+            document.querySelectorAll('.course-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Выделяем выбранный курс
+            element.classList.add('active');
+            
+            currentCourseId = courseId;
+            
+            // Загружаем атрибуты и студентов
+            await Promise.all([
+                loadAttributes(courseId),
+                loadStudents(courseId)
+            ]);
+            
+            // Показываем секции
+            document.getElementById('attributesSection').style.display = 'block';
+            document.getElementById('studentsSection').style.display = 'block';
+        }
+
+        // Загрузка атрибутов курса
+        async function loadAttributes(courseId) {
+            try {
+                const response = await fetch(`/api/professor/course/attributes?course_id=${courseId}`, {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load attributes');
+                }
+                
+                currentAttributes = await response.json();
+                displayAttributes(currentAttributes);
+            } catch (error) {
+                document.getElementById('attributesContainer').innerHTML = 
+                    '<div class="error-message">Ошибка загрузки атрибутов: ' + error.message + '</div>';
+            }
+        }
+
+        function displayAttributes(attributes) {
+            const container = document.getElementById('attributesContainer');
+            
+            if (attributes.length === 0) {
+                container.innerHTML = '<div>Нет атрибутов оценивания</div>';
+                return;
+            }
+            
+            container.innerHTML = attributes.map(attr => `
+                <div class="attribute-card">
+                    <div class="attribute-name">${attr.name}</div>
+                    <div class="attribute-max">Макс. баллов: ${attr.max_points}</div>
+                </div>
+            `).join('');
+        }
+
+        // Загрузка студентов курса
+        async function loadStudents(courseId) {
+            try {
+                const response = await fetch(`/api/professor/course/students?course_id=${courseId}`, {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load students');
+                }
+                
+                const students = await response.json();
+                displayStudents(students);
+            } catch (error) {
+                document.getElementById('studentsContainer').innerHTML = 
+                    '<div class="error-message">Ошибка загрузки студентов: ' + error.message + '</div>';
+            }
+        }
+
+        function displayStudents(students) {
+            const container = document.getElementById('studentsContainer');
+            
+            if (students.length === 0) {
+                container.innerHTML = '<div class="loading">Нет студентов в этом курсе</div>';
+                return;
+            }
+            
+            // Для простоты используем первый атрибут для ввода баллов
+            const attributeId = currentAttributes.length > 0 ? currentAttributes[0].id : 0;
+            const attributeName = currentAttributes.length > 0 ? currentAttributes[0].name : 'Баллы';
+            const maxPoints = currentAttributes.length > 0 ? currentAttributes[0].max_points : 100;
+            
+            container.innerHTML = `
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>Студент</th>
+                            <th>${attributeName}</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${students.map(student => `
+                            <tr>
+                                <td>${student.student_name}</td>
+                                <td>
+                                    <input 
+                                        type="number" 
+                                        class="points-input" 
+                                        value="${student.points}" 
+                                        min="0" 
+                                        max="${maxPoints}"
+                                        step="0.1"
+                                        id="points_${student.student_id}"
+                                    />
+                                    / ${maxPoints}
+                                </td>
+                                <td>
+                                    <button 
+                                        class="save-btn" 
+                                        onclick="savePoints(${student.student_id}, ${attributeId})"
+                                    >
+                                        Сохранить
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // Сохранение баллов
+        async function savePoints(studentId, attributeId) {
+            const pointsInput = document.getElementById(`points_${studentId}`);
+            const points = parseFloat(pointsInput.value);
+            const maxPoints = currentAttributes.find(attr => attr.id === attributeId)?.max_points || 100;
+
+            if (points < 0 || points > maxPoints) {
+                alert(`Баллы должны быть в диапазоне от 0 до ${maxPoints}`);
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/professor/update-points', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        student_id: studentId,
+                        course_id: currentCourseId,
+                        attribute_id: attributeId,
+                        points: points
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save points');
+                }
+
+                showMessage('Баллы успешно обновлены!', 'success');
+            } catch (error) {
+                showMessage('Ошибка сохранения баллов: ' + error.message, 'error');
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+            messageDiv.textContent = message;
+            
+            document.querySelector('.main-content').insertBefore(messageDiv, document.querySelector('.control-panel'));
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = '/';
+            }
+        }
+
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/verify', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    window.location.href = '/';
+                    return;
+                }
+                
+                const data = await response.json();
+                if (data.user_type !== 'Professor') {
+                    window.location.href = '/dashboard';
+                    return;
+                }
+                
+                // Загружаем курсы после проверки авторизации
+                loadCourses();
+            } catch (error) {
+                window.location.href = '/';
+            }
+        }
+
+        // Инициализация
+        checkAuth();
+    </script>
+</body>
+</html>
